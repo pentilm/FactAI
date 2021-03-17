@@ -12,7 +12,7 @@ import argparse
 from service import registry
 
 logging.basicConfig(level=10, format="%(asctime)s - [%(levelname)8s] - %(name)s - %(message)s")
-log = logging.getLogger("run_factai_service")
+#log = logging.getLogger("run_factai_service")
 
 def main():
 	parser = argparse.ArgumentParser(description="Run services")
@@ -36,7 +36,7 @@ def main():
 	root_path = pathlib.Path(__file__).absolute().parent
 
 	# All services modules go here
-	service_modules = ["service.factai_service"]
+	service_modules = ["service.factai-service"]
 
 	# call for all the services listed in service_modules
 	all_p = start_all_services(root_path, service_modules, args.run_daemon, args.daemon_config, args.run_ssl)
@@ -50,7 +50,8 @@ def main():
 					kill_and_exit(all_p)
 			time.sleep(1)
 	except Exception as e:
-		log.error(e)
+		print(e)
+                #log.error(e)
 		raise
 
 def start_all_services(cwd, service_modules, run_daemon, daemon_config, run_ssl):
@@ -62,7 +63,7 @@ def start_all_services(cwd, service_modules, run_daemon, daemon_config, run_ssl)
 	all_p = []
 	for i, service_module in enumerate(service_modules):
 		service_name = service_module.split(".")[-1]
-		log.info("Launching {} on port {}".format(str(registry[service_name]), service_module))
+		#log.info("Launching {} on port {}".format(str(registry[service_name]), service_module))
 		all_p += start_service(cwd, service_module, run_daemon, daemon_config, run_ssl)
 
 	return all_p
@@ -114,7 +115,8 @@ def kill_and_exit(all_p):
 		try:
 			os.kill(p.pid, signal.SIGTERM)
 		except Exception as e:
-			log.error(e)	
+			print(e)
+                        #log.error(e)	
 	exit(1)
 
 if __name__ == "__main__":
