@@ -12,7 +12,7 @@ import argparse
 from service import registry
 
 logging.basicConfig(level=10, format="%(asctime)s - [%(levelname)8s] - %(name)s - %(message)s")
-#log = logging.getLogger("run_factai_service")
+log = logging.getLogger("run_factai_service")
 
 def main():
 	parser = argparse.ArgumentParser(description="Run services")
@@ -36,7 +36,7 @@ def main():
 	root_path = pathlib.Path(__file__).absolute().parent
 
 	# All services modules go here
-	service_modules = ["service.factai-service"]
+	service_modules = ["service.factai_service"]
 
 	# call for all the services listed in service_modules
 	all_p = start_all_services(root_path, service_modules, args.run_daemon, args.daemon_config, args.run_ssl)

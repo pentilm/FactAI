@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package factai_service;
+
+message InputData {
+    string headline = 1;
+    string body = 2;
+}
+
+message Stance {
+    float agree = 1;
+    float disagree = 2;
+    float discuss = 3;
+    float unrelated = 4;
+}
+
+service FACTAIStanceClassification {
+    rpc stance_classify(InputData) returns (Stance) {}
+}
