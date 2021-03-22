@@ -14,7 +14,7 @@
 
 
 # Import relevant packages and modules
-from util import *
+from service.util import *
 import random
 import tensorflow as tf
 
@@ -25,9 +25,9 @@ import sys
 import grpc
 import time
 from concurrent import futures
-sys.path.append("./service_spec")
-import factai_service_pb2 as pb2
-import factai_service_pb2_grpc as pb2_grpc
+#sys.path.append("./service_spec")
+import service.service_spec.factai_service_pb2 as pb2
+import service.service_spec.factai_service_pb2_grpc as pb2_grpc
 
 mode = None
 serve_mode = None

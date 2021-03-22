@@ -1,9 +1,9 @@
 import sys
 import grpc
 
-sys.path.append("./service_spec")
-import factai_service_pb2 as pb2
-import factai_service_pb2_grpc as pb2_grpc
+#sys.path.append("./service_spec")
+import service.service_spec.factai_service_pb2 as pb2
+import service.service_spec.factai_service_pb2_grpc as pb2_grpc
 
 
 def get_stance(channel):
