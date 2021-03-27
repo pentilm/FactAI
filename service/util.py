@@ -101,7 +101,7 @@ class FNCData:
         rows = []
 
         # Process file
-        with open("service/"+filename, "r", encoding='utf-8') as table:
+        with open(filename, "r", encoding='utf-8') as table:
             r = DictReader(table)
             for line in r:
                 rows.append(line)
@@ -301,7 +301,7 @@ def load_model(sess):
     """
 
     saver = tf.train.Saver()
-    saver.restore(sess, './model/model.checkpoint')
+    saver.restore(sess, 'service/model/model.checkpoint')
 
 
 def save_predictions(pred, file):

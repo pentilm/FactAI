@@ -42,11 +42,11 @@ else:
     mode = input('mode (serve / load / train)? ')
 
 # Set file names
-file_train_instances = "train_stances.csv"
-file_train_bodies = "train_bodies.csv"
-file_test_instances = "test_stances_unlabeled.csv"
-file_test_bodies = "test_bodies.csv"
-file_predictions = 'predictions_test.csv'
+file_train_instances = "service/train_stances.csv"
+file_train_bodies = "service/train_bodies.csv"
+file_test_instances = "service/test_stances_unlabeled.csv"
+file_test_bodies = "service/test_bodies.csv"
+file_predictions = 'service/predictions_test.csv'
 
 
 # Initialise hyperparameters
@@ -166,7 +166,7 @@ if mode == 'serve':
     sess = tf.Session()
     load_model(sess)
     if serve_port == None:
-        serve_port = 13221
+        serve_port = 7007
     if serve_mode == None:
         serve_mode = input('input (rest / grpc)? ')
     if serve_mode == 'rest':

@@ -62,5 +62,5 @@ def get_stance(channel):
     print(res)
 
 
-with grpc.insecure_channel('localhost:13221') as channel:
+with grpc.insecure_channel('localhost:7007') as channel:
     get_stance(channel)

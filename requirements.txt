@@ -1,5 +1,7 @@
 grpcio>=1.14.2
 grpcio-tools>=1.14.1
-numpy
-sklearn
-tensorflow
+numpy==1.11.3
+scikit-learn==0.18.1
+scipy==0.18.1
+tensorflow==0.12.1
+protobuf
