@@ -15,9 +15,9 @@ if __name__ == "__main__":
 				test_flag = True
 
 		# Fact AI Service - Arithmetic
-		endpoint = input("Endpoint (localhost:{}): ".format(registry["factai_service"]["grpc"])) if not test_flag else ""
+		endpoint = input("Endpoint (195.201.197.25:{}): ".format(registry["factai_service"]["grpc"])) if not test_flag else ""
 		if endpoint == "":
-			endpoint = "localhost:{}".format(registry["factai_service"]["grpc"])
+			endpoint = "195.201.197.25:{}".format(registry["factai_service"]["grpc"])
 
 		grpc_method = "stance_classify"
 
