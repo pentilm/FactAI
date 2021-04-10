@@ -1,6 +1,6 @@
 import sys
 import grpc
-
+import time
 # import the generated classes
 import service.service_spec.factai_service_pb2_grpc as pb2_grpc
 import service.service_spec.factai_service_pb2 as pb2
@@ -76,8 +76,8 @@ if __name__ == "__main__":
 		stub = pb2_grpc.FACTAIStanceClassificationStub(channel)
 		inp = pb2.InputData(headline=headline, body=body)
 
-		if grpc_method == "stance_classify":
-			response = stub.stance_classify(inp)
+		if grpc_method == "stance_classify":	
+			response = stub.stance_classify(inp)			
 			print(response)
 		else:
 			print("Invalid method!")

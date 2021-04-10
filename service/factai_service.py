@@ -28,6 +28,7 @@ from concurrent import futures
 #sys.path.append("./service_spec")
 import service.service_spec.factai_service_pb2 as pb2
 import service.service_spec.factai_service_pb2_grpc as pb2_grpc
+from resutils import *
 
 serve_port = 7007
 
@@ -98,6 +99,13 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         self.tf_session = tf_session
 
     def stance_classify(self, req, ctxt):
+        try:
+            telemetry=resutils()
+            start_time=time.time()
+            cpu_start_time=telemetry.cpu_ticks()
+        except:
+            pass
+        
         headline = req.headline
         body = req.body
         input_data = {'headline' : headline,
@@ -113,6 +121,14 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         stance_pred.disagree = pred[1]
         stance_pred.discuss = pred[2]
         stance_pred.unrelated = pred[3]
+        try:
+            memory_used=telemetry.memory_usage()
+            time_taken=time.time()-start_time
+            cpu_used=telemetry.cpu_ticks()-cpu_start_time
+            net_used=telemetry.block_in()
+            telemetry.call_telemetry(str(cpu_used),str(memory_used),str(net_used),str(time_taken))
+        except:
+            pass        
         return stance_pred
 
 def run_server(tf_session):

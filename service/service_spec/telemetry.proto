@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package session_manager;
+import "google/protobuf/empty.proto";
+
+//telemetry input message
+message TelemetryInput {
+    float cpu_used = 1;
+    float memory_used =2;
+    float net_used = 3;
+    float time_taken =4;
+    string device_name=5;
+}
+
+message TelemetryOutput {
+    string txn = 1;
+}
+
+// Service definitions
+service SessionManager {
+    rpc telemetry(TelemetryInput) returns (TelemetryOutput) {}
+}   
