@@ -1,10 +1,12 @@
 import sys
 import grpc
+import os
 
 #sys.path.append("./service_spec")
 import service.service_spec.factai_service_pb2 as pb2
 import service.service_spec.factai_service_pb2_grpc as pb2_grpc
 
+server_port = "localhost:" + os.environ['SERVICE_PORT'] # port Fact AI Service runs
 
 def get_stance(channel):
     stub = pb2_grpc.FACTAIStanceClassificationStub(channel)

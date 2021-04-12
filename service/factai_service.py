@@ -17,6 +17,7 @@
 from service.util import *
 import random
 import tensorflow as tf
+import os
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
@@ -30,7 +31,7 @@ import service.service_spec.factai_service_pb2 as pb2
 import service.service_spec.factai_service_pb2_grpc as pb2_grpc
 from resutils import *
 
-serve_port = 7007
+serve_port = os.environ['SERVICE_PORT']
 
 # Set file names
 file_train_instances = "service/train_stances.csv"
@@ -38,7 +39,6 @@ file_train_bodies = "service/train_bodies.csv"
 file_test_instances = "service/test_stances_unlabeled.csv"
 file_test_bodies = "service/test_bodies.csv"
 file_predictions = 'service/predictions_test.csv'
-
 
 # Initialise hyperparameters
 r = random.Random()
@@ -104,7 +104,7 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             start_time=time.time()
             cpu_start_time=telemetry.cpu_ticks()
         except:
-            pass
+            print("telemetry is not working")
         
         headline = req.headline
         body = req.body
@@ -128,7 +128,7 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             net_used=telemetry.block_in()
             telemetry.call_telemetry(str(cpu_used),str(memory_used),str(net_used),str(time_taken))
         except:
-            pass        
+            print("telemetry is not working")  
         return stance_pred
 
 def run_server(tf_session):
