@@ -70,7 +70,7 @@ n_train = len(raw_train.instances)
 train_set, train_stances, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = \
     pipeline_train(raw_train, raw_test, lim_unigram=lim_unigram)
 feature_size = len(train_set[0])
-logger.info("feature_size: ", str(feature_size))
+logger.info("feature_size: "+ str(feature_size))
 test_set = pipeline_test(raw_test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
 
 
