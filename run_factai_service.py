@@ -10,9 +10,11 @@ import json
 import argparse
 
 from service import registry
+import log
 
-logging.basicConfig(level=10, format="%(asctime)s - [%(levelname)8s] - %(name)s - %(message)s")
-log = logging.getLogger("run_factai_service")
+class Log:
+    logger = log.setup_custom_logger('TRACE')
+logger=Log.logger
 
 def main():
 	parser = argparse.ArgumentParser(description="Run services")
@@ -50,8 +52,7 @@ def main():
 					kill_and_exit(all_p)
 			time.sleep(1)
 	except Exception as e:
-		print(e)
-                #log.error(e)
+		logger(e)
 		raise
 
 def start_all_services(cwd, service_modules, run_daemon, daemon_config, run_ssl):
@@ -115,8 +116,7 @@ def kill_and_exit(all_p):
 		try:
 			os.kill(p.pid, signal.SIGTERM)
 		except Exception as e:
-			print(e)
-                        #log.error(e)	
+			logger(e)
 	exit(1)
 
 if __name__ == "__main__":

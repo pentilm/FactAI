@@ -31,6 +31,13 @@ import service.service_spec.factai_service_pb2 as pb2
 import service.service_spec.factai_service_pb2_grpc as pb2_grpc
 from resutils import *
 
+import logging
+import log
+
+from run_factai_service import Log
+
+logger=Log.logger
+
 serve_port = os.environ['SERVICE_PORT']
 
 # Set file names
@@ -63,7 +70,7 @@ n_train = len(raw_train.instances)
 train_set, train_stances, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = \
     pipeline_train(raw_train, raw_test, lim_unigram=lim_unigram)
 feature_size = len(train_set[0])
-print("feature_size: ", feature_size)
+logger.info("feature_size: ", str(feature_size))
 test_set = pipeline_test(raw_test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
 
 
@@ -104,7 +111,7 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             start_time=time.time()
             cpu_start_time=telemetry.cpu_ticks()
         except:
-            print("telemetry is not working")
+            logger.error("telemetry is not working")
         
         headline = req.headline
         body = req.body
@@ -128,7 +135,8 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             net_used=telemetry.block_in()
             telemetry.call_telemetry(str(cpu_used),str(memory_used),str(net_used),str(time_taken))
         except:
-            print("telemetry is not working")  
+            logger.error("telemetry is not working")
+        logger.info(str(stance_pred))  
         return stance_pred
 
 def run_server(tf_session):
@@ -174,10 +182,10 @@ grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 pb2_grpc.add_FACTAIStanceClassificationServicer_to_server(GRPCapi(sess), grpc_server)
 grpc_server.add_insecure_port('[::]:' + str(serve_port))
 grpc_server.start()
-print("GRPC Server Started on port: " + str(serve_port))
+logger.info("GRPC Server Started on port: " + str(serve_port))
 try:
     while True:
         time.sleep(10)
 except KeyboardInterrupt:
-    print("Exiting....")
+    logger.error("Exiting....")
     grpc_server.stop(0)
