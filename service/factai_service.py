@@ -36,6 +36,10 @@ import log
 
 from run_factai_service import Log
 
+import service.service_spec.service_proto_pb2 as service_proto_pb2
+import service.service_spec.service_proto_pb2_grpc  as service_proto_pb2_grpc
+
+
 logger=Log.logger
 
 serve_port = os.environ['SERVICE_PORT']
@@ -139,6 +143,19 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         logger.info(str(stance_pred))  
         return stance_pred
 
+class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
+                     
+    def req_msg(self, req, ctxt):
+        #TODO:  use https://googleapis.dev/python/protobuf/latest/ instead of reading from file 
+        with open('service/service_spec/factai_service.proto', 'r') as file:
+            proto_str = file.read()
+        reqMessage=service_proto_pb2.reqMessage()
+        reqMessage.proto_defnition=proto_str
+        reqMessage.service_stub="FACTAIStanceClassificationStub"
+        reqMessage.service_input="InputData"
+        reqMessage.function_name="stance_classify"
+        return reqMessage
+
 def run_server(tf_session):
     class HTTPapi(BaseHTTPRequestHandler):
         def do_POST(self):
@@ -180,6 +197,7 @@ sess = tf.Session()
 load_model(sess)
 grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 pb2_grpc.add_FACTAIStanceClassificationServicer_to_server(GRPCapi(sess), grpc_server)
+service_proto_pb2_grpc.add_ProtoDefnitionServicer_to_server(GRPCproto(), grpc_server)
 grpc_server.add_insecure_port('[::]:' + str(serve_port))
 grpc_server.start()
 logger.info("GRPC Server Started on port: " + str(serve_port))

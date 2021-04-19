@@ -6,7 +6,7 @@ import service.service_spec.factai_service_pb2_grpc as pb2_grpc
 import service.service_spec.factai_service_pb2 as pb2
 
 from service import registry
-
+import logging
 if __name__ == "__main__":
 	try:
 		test_flag = False
@@ -78,11 +78,11 @@ if __name__ == "__main__":
 
 		if grpc_method == "stance_classify":	
 			response = stub.stance_classify(inp)			
-			print(response)
+			logging.debug(response)
 		else:
-			print("Invalid method!")
+			logging.debug("Invalid method!")
 			exit(1)
 			
 	except Exception as e:
-		print(e)
+		logging.debug(e)
 		exit(1)

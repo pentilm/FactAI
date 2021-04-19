@@ -6,7 +6,17 @@ import os
 import service.service_spec.factai_service_pb2 as pb2
 import service.service_spec.factai_service_pb2_grpc as pb2_grpc
 
+import service.service_spec.service_proto_pb2 as service_proto_pb2
+import service.service_spec.service_proto_pb2_grpc  as service_proto_pb2_grpc
+
+import logging
 server_port = "localhost:" + os.environ['SERVICE_PORT'] # port Fact AI Service runs
+
+def get_service_proto(channel):
+    stub = service_proto_pb2_grpc.ProtoDefnitionStub(channel)
+    protoParams = service_proto_pb2.protoParams()
+    res = stub.req_msg(protoParams)
+    logging.debug(res)
 
 def get_stance(channel):
     stub = pb2_grpc.FACTAIStanceClassificationStub(channel)
@@ -61,8 +71,10 @@ def get_stance(channel):
     member of the reelection campaign, goes to Nevada and Arizona; Donald Trump
     Jr. will be at events in North Carolina and Pennsylvania.'''
     res = stub.stance_classify(in_d)
-    print(res)
+    logging.debug(res)
 
+with grpc.insecure_channel('localhost:7007') as channel:
+    get_service_proto(channel)
 
 with grpc.insecure_channel('localhost:7007') as channel:
     get_stance(channel)

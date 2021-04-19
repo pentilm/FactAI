@@ -17,3 +17,5 @@ message Stance {
 service FACTAIStanceClassification {
     rpc stance_classify(InputData) returns (Stance) {}
 }
+
+//TODO: warning -- upstream code change (SNET)

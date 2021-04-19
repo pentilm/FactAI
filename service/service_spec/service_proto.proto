@@ -1,0 +1,19 @@
+
+syntax = "proto3";
+
+
+import "google/protobuf/empty.proto";
+
+
+message reqMessage {
+    string proto_defnition=1;
+    string service_stub=2;
+    string service_input=3;
+    string function_name=4;
+
+}
+message protoParams {}
+
+service ProtoDefnition {
+    rpc req_msg(protoParams) returns (reqMessage) {}
+}
