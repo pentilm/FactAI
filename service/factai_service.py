@@ -114,8 +114,8 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             telemetry=resutils()
             start_time=time.time()
             cpu_start_time=telemetry.cpu_ticks()
-        except:
-            logger.error("telemetry is not working")
+        except Exception as e:
+            logger.error(e)
         
         headline = req.headline
         body = req.body
@@ -137,9 +137,10 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             time_taken=time.time()-start_time
             cpu_used=telemetry.cpu_ticks()-cpu_start_time
             net_used=telemetry.block_in()
-            telemetry.call_telemetry(str(cpu_used),str(memory_used),str(net_used),str(time_taken))
-        except:
-            logger.error("telemetry is not working")
+            result=telemetry.call_telemetry(cpu_used,memory_used,net_used,time_taken)
+            logger.info(result)
+        except Exception as e:
+            logger.error(e)
         logger.info(str(stance_pred))  
         return stance_pred
 

@@ -1,8 +1,5 @@
 syntax = "proto3";
 
-package session_manager;
-import "google/protobuf/empty.proto";
-
 //telemetry input message
 message TelemetryInput {
     float cpu_used = 1;
@@ -12,11 +9,12 @@ message TelemetryInput {
     string device_name=5;
 }
 
+
 message TelemetryOutput {
-    string txn = 1;
+    string response = 1;
 }
 
-// Service definitions
-service SessionManager {
+service HuggingfaceAdapter {
     rpc telemetry(TelemetryInput) returns (TelemetryOutput) {}
-}   
+}
+

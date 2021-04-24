@@ -5,6 +5,9 @@ import requests
 import os
 import subprocess
 import sys
+import grpc
+import service.service_spec.telemetry_pb2 as telemetry_pb2
+import service.service_spec.telemetry_pb2_grpc as telemetry_pb2_grpc
 
 class resutils():
     def __init__(self):
@@ -27,5 +30,7 @@ class resutils():
         return getrusage(RUSAGE_SELF).ru_inblock/to_KB
 
     def call_telemetry(self,cpu_used,memory_used,net_used,time_taken):
-        params='{"device_name":"'+self.device_name+'","cpu_used": "'+cpu_used+'","memory_used":"'+memory_used+'","net_used":"'+net_used+'","time_taken":"'+time_taken+'"}'
-        subprocess.Popen(["grpcurl", "-plaintext", "-proto", "service/service_spec/telemetry.proto", "-d",  str(params) , "195.201.197.25:50000" , "session_manager.SessionManager/telemetry"],stderr=subprocess.PIPE)
+        channel = grpc.insecure_channel("{}".format("demo.huggingface.io:7003"))
+        stub = telemetry_pb2_grpc.HuggingfaceAdapterStub(channel)
+        result=stub.telemetry(telemetry_pb2.TelemetryInput(cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name))
+        return str(result)
