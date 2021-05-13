@@ -30,7 +30,7 @@ class resutils():
         return getrusage(RUSAGE_SELF).ru_inblock/to_KB
 
     def call_telemetry(self,cpu_used,memory_used,net_used,time_taken):
-        channel = grpc.insecure_channel("{}".format("demo.huggingface.io:7003"))
+        channel = grpc.insecure_channel("{}".format("demo.huggingface.io:7004"))
         stub = telemetry_pb2_grpc.HuggingfaceAdapterStub(channel)
         result=stub.telemetry(telemetry_pb2.TelemetryInput(cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name))
         return str(result)
