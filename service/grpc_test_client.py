@@ -10,7 +10,12 @@ import service.service_spec.service_proto_pb2 as service_proto_pb2
 import service.service_spec.service_proto_pb2_grpc  as service_proto_pb2_grpc
 
 import logging
-server_port = "localhost:" + os.environ['SERVICE_PORT'] # port Fact AI Service runs
+
+if len(sys.argv) == 2:
+    grpc_port = sys.argv[1]
+else:
+    grpc_port="7007"
+server_port = "localhost:" + grpc_port # port Fact AI Service runs
 
 def get_service_proto(channel):
     stub = service_proto_pb2_grpc.ProtoDefnitionStub(channel)
@@ -73,8 +78,8 @@ def get_stance(channel):
     res = stub.stance_classify(in_d)
     logging.debug(res)
 
-with grpc.insecure_channel('localhost:7007') as channel:
+with grpc.insecure_channel('localhost:'+str(grpc_port)) as channel:
     get_service_proto(channel)
 
-with grpc.insecure_channel('localhost:7007') as channel:
+with grpc.insecure_channel('localhost:'+str(grpc_port)) as channel:
     get_stance(channel)

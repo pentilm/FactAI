@@ -14,8 +14,12 @@ if __name__ == "__main__":
 			if sys.argv[1] == "auto":
 				test_flag = True
 
+		if len(sys.argv) == 2:
+    		grpc_port = sys.argv[1]
+		else:
+    		grpc_port="7007"
 		# Fact AI Service - Arithmetic
-		endpoint = input("Endpoint (localhost:{}): ".format(registry["factai_service"]["grpc"])) if not test_flag else ""
+		endpoint = input("Endpoint (localhost:{}): ".format(grpc_port)) if not test_flag else ""
 		if endpoint == "":
 			endpoint = "localhost:{}".format(registry["factai_service"]["grpc"])
 

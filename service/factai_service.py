@@ -40,6 +40,11 @@ import service.service_spec.service_proto_pb2 as service_proto_pb2
 import service.service_spec.service_proto_pb2_grpc  as service_proto_pb2_grpc
 
 
+try:
+    grpc_port = os.getenv("NOMAD_PORT_rpc")
+except:
+    grpc_port = "7007"    
+
 logger=Log.logger
 
 serve_port = os.environ['SERVICE_PORT']
@@ -199,9 +204,9 @@ load_model(sess)
 grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 pb2_grpc.add_FACTAIStanceClassificationServicer_to_server(GRPCapi(sess), grpc_server)
 service_proto_pb2_grpc.add_ProtoDefnitionServicer_to_server(GRPCproto(), grpc_server)
-grpc_server.add_insecure_port('[::]:' + str(serve_port))
+grpc_server.add_insecure_port('[::]:' + str(grpc_port))
 grpc_server.start()
-logger.info("GRPC Server Started on port: " + str(serve_port))
+logger.info("GRPC Server Started on port: " + str(grpc_port))
 try:
     while True:
         time.sleep(10)
