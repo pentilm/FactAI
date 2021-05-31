@@ -137,6 +137,7 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         stance_pred.disagree = pred[1]
         stance_pred.discuss = pred[2]
         stance_pred.unrelated = pred[3]
+        response=""
         try:
             memory_used=telemetry.memory_usage()
             time_taken=time.time()-start_time
