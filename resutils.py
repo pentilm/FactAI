@@ -38,12 +38,12 @@ class resutils():
         service_port=service_description["ServiceTaggedAddresses"]["lan_ipv4"]["Port"]
         return str(service_address),str(service_port)
     
-    def call_telemetry(self,cpu_used,memory_used,net_used,time_taken):
+    def call_telemetry(self,stance_pred,cpu_used,memory_used,net_used,time_taken):
         req_address=self.get_address()
         address=req_address[0]
         port=req_address[1]
         huggingface_adapter_address=address+":"+port
         channel = grpc.insecure_channel("{}".format(huggingface_adapter_address))
         stub = telemetry_pb2_grpc.HuggingfaceAdapterStub(channel)
-        result=stub.telemetry(telemetry_pb2.TelemetryInput(cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name))
+        result=stub.telemetry(telemetry_pb2.TelemetryInput(result=stance_pred,cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name))
         return str(result)

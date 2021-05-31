@@ -2,11 +2,12 @@ syntax = "proto3";
 
 //telemetry input message
 message TelemetryInput {
-    float cpu_used = 1;
-    float memory_used =2;
-    float net_used = 3;
-    float time_taken =4;
-    string device_name=5;
+    string result = 1;
+    float cpu_used = 2;
+    float memory_used = 3;
+    float net_used = 4;
+    float time_taken = 5;
+    string device_name = 6;
 }
 
 
