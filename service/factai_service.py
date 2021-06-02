@@ -133,6 +133,7 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
         pred = self.tf_session.run(softmaxed_logits, feed_dict=test_feed_dict)[0]
         stance_pred = pb2.Stance()
+        resp=pb2.Resp()
         stance_pred.agree = pred[0]
         stance_pred.disagree = pred[1]
         stance_pred.discuss = pred[2]
@@ -149,8 +150,9 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             logger.info(response)
         except Exception as e:
             logger.error(e)
+        resp.response=response
         logger.info(str(stance_pred))  
-        return response
+        return resp
 
 class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
                      

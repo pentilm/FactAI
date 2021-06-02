@@ -14,8 +14,12 @@ message Stance {
     float unrelated = 4;
 }
 
+message Resp {
+    string resp =1;
+}
+
 service FACTAIStanceClassification {
-    rpc stance_classify(InputData) returns (Stance) {}
+    rpc stance_classify(InputData) returns (Resp) {}
 }
 
 //TODO: warning -- upstream code change (SNET)
