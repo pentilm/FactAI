@@ -15,7 +15,7 @@ message Stance {
 }
 
 message Resp {
-    string resp =1;
+    string response =1;
 }
 
 service FACTAIStanceClassification {
