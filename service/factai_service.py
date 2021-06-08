@@ -144,7 +144,7 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             time_taken=time.time()-start_time
             cpu_used=telemetry.cpu_ticks()-cpu_start_time
             net_used=telemetry.block_in()
-            txn_hash=telemetry.call_telemetry(stance_pred,cpu_used,memory_used,net_used,time_taken)
+            txn_hash=telemetry.call_telemetry(str(stance_pred),cpu_used,memory_used,net_used,time_taken)
             response=[stance_pred,txn_hash]
             response=str(response)
             logger.info(response)
