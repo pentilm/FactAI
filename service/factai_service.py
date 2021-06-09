@@ -152,7 +152,7 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             logger.error(e)
         resp.response=response
         logger.info(str(stance_pred))  
-        return resp
+        return resp.response
 
 class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
                      
