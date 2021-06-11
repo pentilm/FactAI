@@ -151,8 +151,9 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         except Exception as e:
             logger.error(e)
         resp.response=response
+        logger.info(str(resp.response))  
         logger.info(str(stance_pred))  
-        return resp.response
+        return resp
 
 class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
                      
