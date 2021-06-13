@@ -144,8 +144,12 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             time_taken=time.time()-start_time
             cpu_used=telemetry.cpu_ticks()-cpu_start_time
             net_used=telemetry.block_in()
-            txn_hash=telemetry.call_telemetry(str(stance_pred),cpu_used,memory_used,net_used,time_taken)
-            response=[str(stance_pred),str(txn_hash)]
+            result = {"agree": pred[0], 
+                "disagree": pred[1],
+                "discuss" : pred[2],
+                "unrelated" : pred[3]}
+            txn_hash=telemetry.call_telemetry(str(result),cpu_used,memory_used,net_used,time_taken)
+            response=[str(result),str(txn_hash)]
             response=str(response)
             logger.info(response)
         except Exception as e:
