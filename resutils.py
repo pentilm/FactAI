@@ -46,4 +46,4 @@ class resutils():
         channel = grpc.insecure_channel("{}".format(huggingface_adapter_address))
         stub = telemetry_pb2_grpc.HuggingfaceAdapterStub(channel)
         result=stub.telemetry(telemetry_pb2.TelemetryInput(result=stance_pred,cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name))
-        return str(result)
+        return str(result.response)
