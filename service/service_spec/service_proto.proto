@@ -17,12 +17,12 @@ message protoParams {}
 message priceParamsService {}
 
 message priceRespService {
-    string cost_per_process=1;
+    float cost_per_process=1;
     string pubk=2;
 }
 
 service ProtoDefnition {
     rpc req_msg(protoParams) returns (reqMessage) {}
-    rpc req_price_service(priceParamsService) returns (priceRespService) {}
+    rpc req_service_price(priceParamsService) returns (priceRespService) {}
 
 }
