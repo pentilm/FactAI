@@ -171,7 +171,7 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         function_name="stance_classify"
         
         with open('service/service_spec/service_definiton.json', 'r') as file:
-            service_defintion_str = file.read()
+            service_definition_str = file.read()
         
         service_definiton=json.loads(service_definiton_str)
         service_definiton["declarations"]["protobuf_definition"]=proto_defnition
