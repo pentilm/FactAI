@@ -165,6 +165,20 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         with open('service/service_spec/factai_service.proto', 'r') as file:
             proto_str = file.read()
         reqMessage=service_proto_pb2.reqMessage()
+        reqMessage.proto_defnition=proto_str
+        reqMessage.service_stub="FACTAIStanceClassificationStub"
+        reqMessage.service_input="InputData"
+        reqMessage.function_name="stance_classify"
+        return reqMessage
+    
+    def req_metadata(self, req, ctxt):
+        #TODO:  use https://googleapis.dev/python/protobuf/latest/ instead of reading from file 
+        with open('service/service_spec/factai_service.proto', 'r') as file:
+            proto_str = file.read()
+        service_name=req.service_name
+        
+        respMessage=service_proto_pb2.respMessage()
+        
         proto_defnition=proto_str
         service_stub="FACTAIStanceClassificationStub"
         service_input="InputData"
@@ -181,8 +195,8 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         service_definiton["price"]["amount"]=75
         service_definiton["price"]["public_key"]="0xb5114121A51c6FfA04dBC73F26eDb7B6bfE2eB35"
         
-        reqMessage.service_definiton=json.dumps(service_definiton)
-        return reqMessage
+        respMessage.service_definiton=json.dumps(service_definiton)
+        return respMessage
 
 def run_server(tf_session):
     class HTTPapi(BaseHTTPRequestHandler):

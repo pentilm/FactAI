@@ -78,8 +78,18 @@ def get_stance(channel):
     res = stub.stance_classify(in_d)
     logging.debug(res)
 
+def get_service_metadata(channel):
+    stub = service_proto_pb2_grpc.ProtoDefnitionStub(channel)
+    metaParams = service_proto_pb2.metaParams()
+    metaParams.service_name="factai"
+    res = stub.req_metadata(metaParams)
+    logging.debug(res)
+
 with grpc.insecure_channel('localhost:'+str(grpc_port)) as channel:
     get_service_proto(channel)
 
 with grpc.insecure_channel('localhost:'+str(grpc_port)) as channel:
     get_stance(channel)
+
+with grpc.insecure_channel('localhost:'+str(grpc_port)) as channel:
+    get_service_metadata(channel)
