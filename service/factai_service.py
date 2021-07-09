@@ -160,6 +160,12 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         return resp
 
 class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
+    def req_service_price(self, req, ctxt):
+        priceParams=service_proto_pb2.priceRespService()
+        priceParams.cost_per_process=75
+        priceParams.pubk="0xb5114121A51c6FfA04dBC73F26eDb7B6bfE2eB35"
+        return priceParams
+
     def req_msg(self, req, ctxt):
         #TODO:  use https://googleapis.dev/python/protobuf/latest/ instead of reading from file 
         with open('service/service_spec/factai_service.proto', 'r') as file:
