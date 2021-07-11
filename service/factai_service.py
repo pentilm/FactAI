@@ -183,7 +183,7 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
             proto_str = file.read()
         service_name=req.service_name
         
-        respMessage=service_proto_pb2.respMessage()
+        respMetadata=service_proto_pb2.respMetadata()
         
         proto_defnition=proto_str
         service_stub="FACTAIStanceClassificationStub"
@@ -201,8 +201,8 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         service_definiton["price"]["amount"]=75
         service_definiton["price"]["public_key"]="0xb5114121A51c6FfA04dBC73F26eDb7B6bfE2eB35"
         
-        respMessage.service_definiton=json.dumps(service_definiton)
-        return respMessage
+        respMetadata.service_definiton=json.dumps(service_definiton)
+        return respMetadata
 
 def run_server(tf_session):
     class HTTPapi(BaseHTTPRequestHandler):
