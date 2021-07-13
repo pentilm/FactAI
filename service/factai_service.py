@@ -193,7 +193,7 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         with open('service/service_spec/service_definition.json', 'r') as file:
             service_definition_str = file.read()
         
-        service_definiton=json.loads(service_definiton_str)
+        service_definiton=json.loads(service_definition_str)
         service_definiton["declarations"]["protobuf_definition"]=proto_defnition
         service_definiton["declarations"]["service_stub"]=service_stub
         service_definiton["declarations"]["function"]=function_name
