@@ -193,15 +193,15 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         with open('service/service_spec/service_definition.json', 'r') as file:
             service_definition_str = file.read()
         
-        service_definiton=json.loads(service_definition_str)
-        service_definiton["declarations"]["protobuf_definition"]=proto_defnition
-        service_definiton["declarations"]["service_stub"]=service_stub
-        service_definiton["declarations"]["function"]=function_name
+        service_definition=json.loads(service_definition_str)
+        service_definition["declarations"]["protobuf_definition"]=proto_defnition
+        service_definition["declarations"]["service_stub"]=service_stub
+        service_definition["declarations"]["function"]=function_name
         
-        service_definiton["price"]["amount"]=75
-        service_definiton["price"]["public_key"]="0xb5114121A51c6FfA04dBC73F26eDb7B6bfE2eB35"
+        service_definition["price"]["amount"]=75
+        service_definition["price"]["public_key"]="0xb5114121A51c6FfA04dBC73F26eDb7B6bfE2eB35"
         
-        respMetadata.service_definiton=json.dumps(service_definiton)
+        respMetadata.service_definiton=json.dumps(service_definition)
         return respMetadata
 
 def run_server(tf_session):
