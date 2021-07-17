@@ -15,7 +15,7 @@ message reqMessage {
 message protoParams {}
 
 message respMetadata {
-    string service_defnition= 1; 
+    string service_definition= 1; 
 }
 
 message metaParams {
