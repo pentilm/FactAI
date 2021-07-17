@@ -201,7 +201,7 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         service_definition["price"]["amount"]=75
         service_definition["price"]["public_key"]="0xb5114121A51c6FfA04dBC73F26eDb7B6bfE2eB35"
         
-        respMetadata.service_definiton=json.dumps(service_definition)
+        respMetadata.service_definition=json.dumps(service_definition)
         return respMetadata
 
 def run_server(tf_session):
