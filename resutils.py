@@ -9,6 +9,9 @@ import grpc
 import service.service_spec.telemetry_pb2 as telemetry_pb2
 import service.service_spec.telemetry_pb2_grpc as telemetry_pb2_grpc
 
+import service.service_spec.registry_pb2_grpc
+import service.service_spec.registry_pb2
+
 class resutils():
     def __init__(self):
         self.device_name="factai"
@@ -37,7 +40,19 @@ class resutils():
         service_address=service_description["ServiceAddress"]
         service_port=service_description["ServiceTaggedAddresses"]["lan_ipv4"]["Port"]
         return str(service_address),str(service_port)
+
+    def get_address(self):
+        service_name=os.environ['huggingface_adapter_name']       
+        with grpc.insecure_channel('demo.huggingface.io:4556') as channel:
+            stub = registry_pb2_grpc.RegistryStub(channel)
+            response = stub.reqServiceEndpoints(
+            registry_pb2.ServiceRequest(service_name=service_name))
+            endpoints = json.loads(response.endpoints)
     
+        service_address=endpoints[0][0]
+        service_port=endpoints[0][1]
+        return str(service_address),str(service_port)
+
     def call_telemetry(self,stance_pred,cpu_used,memory_used,net_used,time_taken):
         req_address=self.get_address()
         address=req_address[0]

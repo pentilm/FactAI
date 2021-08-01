@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+message ServiceRequest {
+    string service_name = 1;
+}
+
+message ServiceEndpoints {
+    string endpoints = 1;
+}
+
+
+service Registry {
+    rpc reqServiceEndpoints(ServiceRequest) returns (ServiceEndpoints) {}
+}

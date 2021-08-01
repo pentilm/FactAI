@@ -240,7 +240,7 @@ def run_server(tf_session):
 
 sess = tf.Session()
 load_model(sess)
-grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=100))
 pb2_grpc.add_FACTAIStanceClassificationServicer_to_server(GRPCapi(sess), grpc_server)
 service_proto_pb2_grpc.add_ProtoDefnitionServicer_to_server(GRPCproto(), grpc_server)
 grpc_server.add_insecure_port('[::]:' + str(grpc_port))
