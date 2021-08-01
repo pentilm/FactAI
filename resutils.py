@@ -32,15 +32,6 @@ class resutils():
         to_KB = 1024.
         return getrusage(RUSAGE_SELF).ru_inblock/to_KB
 
-    def get_address(self):   
-        service_name=os.environ['huggingface_adapter_name']
-        service_description=requests.get("https://consul.icog-labs.com/v1/catalog/service/"+service_name)
-        service_description=service_description.content
-        service_description=json.loads(service_description.decode('utf8'))[0]
-        service_address=service_description["ServiceAddress"]
-        service_port=service_description["ServiceTaggedAddresses"]["lan_ipv4"]["Port"]
-        return str(service_address),str(service_port)
-
     def get_address(self):
         service_name=os.environ['huggingface_adapter_name']       
         with grpc.insecure_channel('demo.huggingface.io:4556') as channel:
