@@ -9,8 +9,8 @@ import grpc
 import service.service_spec.telemetry_pb2 as telemetry_pb2
 import service.service_spec.telemetry_pb2_grpc as telemetry_pb2_grpc
 
-import service.service_spec.registry_pb2_grpc
-import service.service_spec.registry_pb2
+import service.service_spec.registry_pb2_grpc as registry_pb2_grpc
+import service.service_spec.registry_pb2 as registry_pb2
 
 class resutils():
     def __init__(self):
