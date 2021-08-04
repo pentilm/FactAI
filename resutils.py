@@ -34,14 +34,11 @@ class resutils():
 
     def get_address(self):
         service_name=os.environ['huggingface_adapter_name']       
-        with grpc.insecure_channel('demo.huggingface.io:4556') as channel:
-            stub = registry_pb2_grpc.RegistryStub(channel)
-            response = stub.reqServiceEndpoints(
-            registry_pb2.ServiceRequest(service_name=service_name))
-            endpoints = json.loads(response.endpoints)
-    
-        service_address=endpoints[0][0]
-        service_port=endpoints[0][1]
+        service_address="135.181.222.170"
+        if service_name=="testing-huggingface-adapter-factai":    
+            service_port=60778
+        else:
+            service_port=60777
         return str(service_address),str(service_port)
 
     def call_telemetry(self,stance_pred,cpu_used,memory_used,net_used,time_taken):
