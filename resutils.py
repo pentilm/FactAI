@@ -30,13 +30,14 @@ class resutils():
         to_KB = 1024.
         return getrusage(RUSAGE_SELF).ru_inblock/to_KB
 
-    def get_address(self):
-        service_name=os.environ['huggingface_adapter_name']       
-        service_address="135.181.222.170"
-        if service_name=="testing-huggingface-adapter-factai":    
-            service_port=60778
-        else:
+    def get_address(self):   
+        #get deployment type to identify the static port
+        deployment_type=os.environ['deployment_type']       
+        service_address="localhost"
+        if deployment_type=="single_adapter":    
             service_port=60777
+        else:
+            service_port=60778
         return str(service_address),str(service_port)
 
     def call_telemetry(self,stance_pred,cpu_used,memory_used,net_used,time_taken):
