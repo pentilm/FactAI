@@ -148,8 +148,9 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
                 "disagree": pred[1],
                 "discuss" : pred[2],
                 "unrelated" : pred[3]}
+            telemetry={'memory used':memory_used,'cpu used':cpu_used,'network used':net_used,'time_taken':time_taken}
             txn_hash=telemetry.call_telemetry(str(result),cpu_used,memory_used,net_used,time_taken)
-            response=[str(result),str(txn_hash)]
+            response=[str(result),str(txn_hash),str(telemetry)]
             response=str(response)
             logger.info(response)
         except Exception as e:
