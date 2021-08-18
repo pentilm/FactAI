@@ -34,7 +34,7 @@ class resutils():
         #get deployment type to identify the static port
         deployment_type=os.environ['deployment_type']       
         service_address="localhost"
-        if deployment_type=="single_adapter":    
+        if deployment_type=="prod":    
             service_port=60777
         else:
             service_port=60778

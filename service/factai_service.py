@@ -191,8 +191,13 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         service_input="InputData"
         function_name="stance_classify"
         
-        with open('service/service_spec/service_definition.json', 'r') as file:
-            service_definition_str = file.read()
+        deployment_type=os.environ['deployment_type']       
+        if deployment_type=="prod":    
+            with open('service/service_spec/service_definition_prod.json', 'r') as file:
+                service_definition_str = file.read()
+        else:
+            with open('service/service_spec/service_definition.json', 'r') as file:
+                service_definition_str = file.read()
         
         service_definition=json.loads(service_definition_str)
         service_definition["declarations"]["protobuf_definition"]=proto_defnition
