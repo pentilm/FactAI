@@ -102,7 +102,8 @@ def start_service(cwd, service_module, run_daemon, daemon_config, run_ssl, grpc_
 
 	service_name = service_module.split(".")[-1]
 	#grpc_port = registry[service_name]["grpc"]
-	p = subprocess.Popen([sys.executable, "-m", service_module, "--grpc-port", str(grpc_port)], cwd=str(cwd))
+	p = subprocess.Popen(["opentelemetry-instrument", "python3", "service/factai_service.py", "--grpc-port", str(grpc_port)], cwd=str(cwd))
+
 	all_p.append(p)
 	return all_p 
 
