@@ -39,34 +39,6 @@ from run_factai_service import Log
 import service.service_spec.service_proto_pb2 as service_proto_pb2
 import service.service_spec.service_proto_pb2_grpc  as service_proto_pb2_grpc
 
-from time import sleep
-
-
-import opentelemetry
-from opentelemetry import trace
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
-
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (
-    ConsoleSpanExporter,
-    SimpleSpanProcessor,
-)
-from opentelemetry.trace import set_span_in_context
-
-
-
-trace.set_tracer_provider(TracerProvider())
-trace_provider=trace.get_tracer_provider().add_span_processor(
-    SimpleSpanProcessor(ConsoleSpanExporter())
-)
-
-grpc_server_instrumentor = GrpcInstrumentorServer()
-grpc_server_instrumentor.instrument()
-
-tracer_server=opentelemetry.instrumentation.grpc.server_interceptor(tracer_provider=trace_provider)
-tracer=trace.get_tracer(tracer_server)
-
 
 try:
     grpc_port = os.getenv("NOMAD_PORT_rpc")
@@ -143,9 +115,6 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         self.tf_session = tf_session
 
     def stance_classify(self, req, ctxt):
-        current_span = trace.get_current_span()
-        current_span.set_attribute("http.route", "some_route")
-        sleep(30 / 1000)
         try:
             telemetry=resutils()
             start_time=time.time()
@@ -170,7 +139,6 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         stance_pred.discuss = pred[2]
         stance_pred.unrelated = pred[3]
         response=""
-        current_span.add_event("event message", {"prediction": str(pred)})
         try:
             memory_used=telemetry.memory_usage()
             time_taken=time.time()-start_time
@@ -184,12 +152,8 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             txn_hash=telemetry.call_telemetry(str(result),cpu_used,memory_used,net_used,time_taken)
             response=[str(result),str(txn_hash),str(resource_usage)]
             response=str(response)
-            current_span.add_event("event message", {"result": str(response)})
             logger.info(response)
         except Exception as e:
-            exception = Exception(str(e))
-            span.record_exception(exception)
-            span.set_status(Status(StatusCode.ERROR, "error happened"))
             logger.error(e)
         resp.response=response
         logger.info(str(resp.response))  
