@@ -46,43 +46,30 @@ import opentelemetry
 from opentelemetry import trace
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (
-    ConsoleSpanExporter,
-    SimpleSpanProcessor,
-)
-
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.zipkin.json import ZipkinExporter
-
 from opentelemetry.trace import set_span_in_context
 
 
+jaeger_address = os.environ['jaeger_address']
 
-trace.set_tracer_provider(TracerProvider())
+
+jaeger_exporter = JaegerExporter(
+    agent_host_name=jaeger_address,
+    agent_port=6831,
+)
 
 
+trace_provider=trace.get_tracer_provider().add_span_processor(
+    BatchSpanProcessor(jaeger_exporter)
+)
 
 grpc_server_instrumentor = GrpcInstrumentorServer()
 grpc_server_instrumentor.instrument()
 
-
-zipkin_exporter = ZipkinExporter(
-    # version=Protocol.V2
-    # optional:
-    # endpoint="http://localhost:9411/api/v2/spans",
-    # local_node_ipv4="192.168.0.1",
-    # local_node_ipv6="2001:db8::c001",
-    # local_node_port=31313,
-    # max_tag_value_length=256
-    # timeout=5 (in seconds)
-)
-
-span_processor = BatchSpanProcessor(zipkin_exporter)
-
-trace_provider=trace.get_tracer_provider().add_span_processor(span_processor)
-
 tracer_server=opentelemetry.instrumentation.grpc.server_interceptor(tracer_provider=trace_provider)
-tracer=trace.get_tracer(tracer_server)
+tracer=trace.get_tracer(__name__)
+
 
 
 try:
