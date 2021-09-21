@@ -5,6 +5,7 @@ package factai_service;
 message InputData {
     string headline = 1;
     string body = 2;
+    string call_id = 3;
 }
 
 message Stance {

@@ -40,12 +40,17 @@ class resutils():
             service_port=60778
         return str(service_address),str(service_port)
 
-    def call_telemetry(self,stance_pred,cpu_used,memory_used,net_used,time_taken):
+    def call_telemetry(self,stance_pred,cpu_used,memory_used,net_used,time_taken,call_id):
         req_address=self.get_address()
         address=req_address[0]
         port=req_address[1]
         huggingface_adapter_address=address+":"+port
         channel = grpc.insecure_channel("{}".format(huggingface_adapter_address))
         stub = telemetry_pb2_grpc.HuggingfaceAdapterStub(channel)
-        result=stub.telemetry(telemetry_pb2.TelemetryInput(result=stance_pred,cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name))
+        deployment_type=os.environ['deployment_type']       
+        if deployment_type=="prod":    
+            service_name="factai"
+        else:
+            service_name="testing-factai"
+        result=stub.telemetry(telemetry_pb2.TelemetryInput(result=stance_pred,cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name,call_id=call_id,service_name=service_name))
         return str(result.response)

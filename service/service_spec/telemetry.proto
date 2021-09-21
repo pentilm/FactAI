@@ -8,6 +8,8 @@ message TelemetryInput {
     float net_used = 4;
     float time_taken = 5;
     string device_name = 6;
+    string call_id = 7;
+    string service_name = 8;
 }
 
 

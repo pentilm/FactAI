@@ -39,6 +39,9 @@ from run_factai_service import Log
 import service.service_spec.service_proto_pb2 as service_proto_pb2
 import service.service_spec.service_proto_pb2_grpc  as service_proto_pb2_grpc
 
+import threading
+
+
 from time import sleep
 
 
@@ -76,6 +79,11 @@ try:
     grpc_port = os.getenv("NOMAD_PORT_rpc")
 except:
     grpc_port = "7007"    
+
+try:
+    tokenomics_mode=os.environ['tokenomics_mode']
+except:
+    tokenomics_mode=""
 
 logger=Log.logger
 
@@ -159,6 +167,7 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         
         headline = req.headline
         body = req.body
+        call_id = req.call_id
         input_data = {'headline' : headline,
                       'body' : body}
         test_set = pipeline_serve(input_data,
@@ -185,7 +194,8 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
                 "discuss" : pred[2],
                 "unrelated" : pred[3]}
             resource_usage={'memory used':memory_used,'cpu used':cpu_used,'network used':net_used,'time_taken':time_taken}
-            txn_hash=telemetry.call_telemetry(str(result),cpu_used,memory_used,net_used,time_taken)
+            
+            txn_hash=telemetry.call_telemetry(str(result),cpu_used,memory_used,net_used,time_taken,call_id)
             response=[str(result),str(txn_hash),str(resource_usage)]
             response=str(response)
             current_span.add_event("event message", {"result": str(response)})
