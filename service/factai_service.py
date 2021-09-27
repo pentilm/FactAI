@@ -226,6 +226,7 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         reqMessage.service_stub="FACTAIStanceClassificationStub"
         reqMessage.service_input="InputData"
         reqMessage.function_name="stance_classify"
+        reqMessage.service_input_params='["body","headline","call_id"]'
         return reqMessage
     
     def req_metadata(self, req, ctxt):
@@ -240,7 +241,8 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         service_stub="FACTAIStanceClassificationStub"
         service_input="InputData"
         function_name="stance_classify"
-        
+        service_input_params='["body","headline","call_id"]'
+
         deployment_type=os.environ['deployment_type']       
         if deployment_type=="prod":    
             with open('service/service_spec/service_definition_prod.json', 'r') as file:
@@ -254,6 +256,7 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         service_definition["declarations"]["service_stub"]=service_stub
         service_definition["declarations"]["function"]=function_name
         service_definition["declarations"]["input"]=service_input
+        service_definiton["declarations"]["service_input_params"]=service_input_params
         respMetadata.service_definition=json.dumps(service_definition)
         return respMetadata
 

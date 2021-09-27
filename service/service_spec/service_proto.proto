@@ -10,6 +10,7 @@ message reqMessage {
     string service_stub=2;
     string service_input=3;
     string function_name=4;
+    string service_input_params=5;
 
 }
 message protoParams {}
