@@ -256,7 +256,7 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         service_definition["declarations"]["service_stub"]=service_stub
         service_definition["declarations"]["function"]=function_name
         service_definition["declarations"]["input"]=service_input
-        service_definiton["declarations"]["service_input_params"]=service_input_params
+        service_definition["declarations"]["service_input_params"]=service_input_params
         respMetadata.service_definition=json.dumps(service_definition)
         return respMetadata
 
