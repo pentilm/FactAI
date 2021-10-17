@@ -198,12 +198,12 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
             txn_hash=telemetry.call_telemetry(str(result),cpu_used,memory_used,net_used,time_taken,call_id)
             response=[str(result),str(txn_hash),str(resource_usage)]
             response=str(response)
-            current_span.add_event("event message", {"result": str(response)})
+            #current_span.add_event("event message", {"result": str(response)})
             logger.info(response)
         except Exception as e:
             exception = Exception(str(e))
-            span.record_exception(exception)
-            span.set_status(Status(StatusCode.ERROR, "error happened"))
+            #span.record_exception(exception)
+            #span.set_status(Status(StatusCode.ERROR, "error happened"))
             logger.error(e)
         resp.response=response
         logger.info(str(resp.response))  
