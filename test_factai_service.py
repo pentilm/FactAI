@@ -15,9 +15,9 @@ if __name__ == "__main__":
 				test_flag = True
 
 		if len(sys.argv) == 2:
-    		grpc_port = sys.argv[1]
+			grpc_port = sys.argv[1]
 		else:
-    		grpc_port="7007"
+			grpc_port="7007"
 		# Fact AI Service - Arithmetic
 		endpoint = input("Endpoint (localhost:{}): ".format(grpc_port)) if not test_flag else ""
 		if endpoint == "":
