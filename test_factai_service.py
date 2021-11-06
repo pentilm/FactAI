@@ -81,7 +81,8 @@ if __name__ == "__main__":
 		inp = pb2.InputData(headline=headline, body=body)
 
 		if grpc_method == "stance_classify":	
-			response = stub.stance_classify(inp)			
+			response = stub.stance_classify(inp)	
+			print(response)		
 			logging.debug(response)
 		else:
 			logging.debug("Invalid method!")

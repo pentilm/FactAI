@@ -33,7 +33,7 @@ class resutils():
     def get_address(self):   
         #get deployment type to identify the static port
         deployment_type=os.environ['deployment_type']       
-        service_address="localhost"
+        service_address="demo.huggingface.io"
         if deployment_type=="prod":    
             service_port=60777
         else:
