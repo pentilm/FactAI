@@ -1,3 +1,5 @@
+snet.sdk
+snet-cli
 grpcio>=1.14.2
 grpcio-tools>=1.14.1
 numpy==1.11.3
