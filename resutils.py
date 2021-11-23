@@ -33,18 +33,25 @@ class resutils():
     def get_address(self):   
         #get deployment type to identify the static port
         deployment_type=os.environ['deployment_type']       
-        service_address="demo.huggingface.io"
+        service_address="localhost"
         if deployment_type=="prod":    
             service_port=60777
         else:
             service_port=60778
         return str(service_address),str(service_port)
 
-    def call_telemetry(self,stance_pred,cpu_used,memory_used,net_used,time_taken,call_id):
+    def call_telemetry(self,stance_pred,cpu_used,memory_used,net_used,time_taken,call_id,tracer_info):
         req_address=self.get_address()
         address=req_address[0]
         port=req_address[1]
         huggingface_adapter_address=address+":"+port
+        span_id = tracer_info.span_id
+        trace_id = tracer_info.trace_id
+        trace_info = str({
+            'trace_id': trace_id,
+            'span_id': span_id
+        })
+
         channel = grpc.insecure_channel("{}".format(huggingface_adapter_address))
         stub = telemetry_pb2_grpc.HuggingfaceAdapterStub(channel)
         deployment_type=os.environ['deployment_type']       
@@ -52,5 +59,5 @@ class resutils():
             service_name="factai"
         else:
             service_name="testing-factai"
-        result=stub.telemetry(telemetry_pb2.TelemetryInput(result=stance_pred,cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name,call_id=call_id,service_name=service_name))
+        result=stub.telemetry(telemetry_pb2.TelemetryInput(result=stance_pred,cpu_used=cpu_used,memory_used=memory_used,net_used=net_used,time_taken=time_taken,device_name=self.device_name,call_id=call_id,service_name=service_name,tracer_info=trace_info))
         return str(result.response)

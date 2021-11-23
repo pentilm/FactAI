@@ -10,6 +10,7 @@ message TelemetryInput {
     string device_name = 6;
     string call_id = 7;
     string service_name = 8;
+    string tracer_info = 9;
 }
 
 

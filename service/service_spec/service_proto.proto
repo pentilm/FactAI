@@ -21,6 +21,7 @@ message respMetadata {
 
 message metaParams {
     string service_name=1;
+    string tracer_info=2;
 }
 
 message priceParamsService {}

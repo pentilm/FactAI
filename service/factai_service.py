@@ -52,6 +52,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import set_span_in_context
+from opentelemetry.trace import NonRecordingSpan, SpanContext, TraceFlags
 
 
 jaeger_address = os.environ['jaeger_address']
@@ -67,10 +68,10 @@ trace_provider=trace.get_tracer_provider().add_span_processor(
     BatchSpanProcessor(jaeger_exporter)
 )
 
-grpc_server_instrumentor = GrpcInstrumentorServer()
-grpc_server_instrumentor.instrument()
+# grpc_server_instrumentor = GrpcInstrumentorServer()
+# grpc_server_instrumentor.instrument()
 
-tracer_server=opentelemetry.instrumentation.grpc.server_interceptor(tracer_provider=trace_provider)
+# tracer_server=opentelemetry.instrumentation.grpc.server_interceptor(tracer_provider=trace_provider)
 tracer=trace.get_tracer(__name__)
 
 
@@ -87,7 +88,7 @@ except:
 
 logger=Log.logger
 
-serve_port = os.environ['SERVICE_PORT']
+# serve_port = os.environ['SERVICE_PORT']
 
 # Set file names
 file_train_instances = "service/train_stances.csv"
@@ -158,57 +159,74 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
         current_span = trace.get_current_span()
         current_span.set_attribute("http.route", "some_route")
         sleep(30 / 1000)
-        try:
-            telemetry=resutils()
-            start_time=time.time()
-            cpu_start_time=telemetry.cpu_ticks()
-        except Exception as e:
-            logger.error(e)
-        
-        headline = req.headline
-        body = req.body
-        call_id = req.call_id
-        input_data = {'headline' : headline,
-                      'body' : body}
-        test_set = pipeline_serve(input_data,
-                                  bow_vectorizer,
-                                  tfreq_vectorizer,
-                                  tfidf_vectorizer)
-        test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
-        pred = self.tf_session.run(softmaxed_logits, feed_dict=test_feed_dict)[0]
-        stance_pred = pb2.Stance()
-        resp=pb2.Resp()
-        stance_pred.agree = pred[0]
-        stance_pred.disagree = pred[1]
-        stance_pred.discuss = pred[2]
-        stance_pred.unrelated = pred[3]
-        response=""
-        current_span.add_event("event message", {"prediction": str(pred)})
-        try:
-            memory_used=telemetry.memory_usage()
-            time_taken=time.time()-start_time
-            cpu_used=telemetry.cpu_ticks()-cpu_start_time
-            net_used=telemetry.block_in()
-            result = {"agree": pred[0], 
-                "disagree": pred[1],
-                "discuss" : pred[2],
-                "unrelated" : pred[3]}
-            resource_usage={'memory used':memory_used,'cpu used':cpu_used,'network used':net_used,'time_taken':time_taken}
+
+        trace_info = eval(req.tracer_info)
+        span_id = trace_info['span_id']
+        trace_id = trace_info['trace_id']
+
+        span_context = SpanContext(
+        trace_id=trace_id,
+        span_id=span_id,
+        is_remote=True,
+        trace_flags=TraceFlags(0x01)
+        )
+        ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
+        with tracer.start_as_current_span("stance_classify", context=ctx) as span:
             
-            txn_hash=telemetry.call_telemetry(str(result),cpu_used,memory_used,net_used,time_taken,call_id)
-            response=[str(result),str(txn_hash),str(resource_usage)]
-            response=str(response)
-            #current_span.add_event("event message", {"result": str(response)})
-            logger.info(response)
-        except Exception as e:
-            exception = Exception(str(e))
-            #span.record_exception(exception)
-            #span.set_status(Status(StatusCode.ERROR, "error happened"))
-            logger.error(e)
-        resp.response=response
-        logger.info(str(resp.response))  
-        logger.info(str(stance_pred))  
-        return resp
+            tracer_info=span.get_span_context()
+            
+
+            try:
+                telemetry=resutils()
+                start_time=time.time()
+                cpu_start_time=telemetry.cpu_ticks()
+            except Exception as e:
+                logger.error(e)
+            
+            headline = req.headline
+            body = req.body
+            call_id = req.call_id
+            input_data = {'headline' : headline,
+                        'body' : body}
+            test_set = pipeline_serve(input_data,
+                                    bow_vectorizer,
+                                    tfreq_vectorizer,
+                                    tfidf_vectorizer)
+            test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
+            pred = self.tf_session.run(softmaxed_logits, feed_dict=test_feed_dict)[0]
+            stance_pred = pb2.Stance()
+            resp=pb2.Resp()
+            stance_pred.agree = pred[0]
+            stance_pred.disagree = pred[1]
+            stance_pred.discuss = pred[2]
+            stance_pred.unrelated = pred[3]
+            response=""
+            span.add_event("event message", {"prediction": str(pred)})
+            try:
+                memory_used=telemetry.memory_usage()
+                time_taken=time.time()-start_time
+                cpu_used=telemetry.cpu_ticks()-cpu_start_time
+                net_used=telemetry.block_in()
+                result = {"agree": pred[0], 
+                    "disagree": pred[1],
+                    "discuss" : pred[2],
+                    "unrelated" : pred[3]}
+                resource_usage={'memory used':memory_used,'cpu used':cpu_used,'network used':net_used,'time_taken':time_taken}
+                
+                txn_hash=telemetry.call_telemetry(str(result),cpu_used,memory_used,net_used,time_taken,call_id,tracer_info)
+                response=[str(result),str(txn_hash),str(resource_usage)]
+                response=str(response)
+                #current_span.add_event("event message", {"result": str(response)})
+                logger.info(response)
+            except Exception as e:
+                exception = Exception(str(e))
+                #span.record_exception(exception)
+                #span.set_status(Status(StatusCode.ERROR, "error happened"))
+                logger.error(e)
+            resp.response=response
+            logger.info(str(resp.response))  
+            logger.info(str(stance_pred))  
+            return resp
 
 class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
     def req_service_price(self, req, ctxt):
@@ -226,39 +244,54 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
         reqMessage.service_stub="FACTAIStanceClassificationStub"
         reqMessage.service_input="InputData"
         reqMessage.function_name="stance_classify"
-        reqMessage.service_input_params='["body","headline","call_id"]'
+        reqMessage.service_input_params='["body","headline","call_id","tracer_info"]'
         return reqMessage
     
     def req_metadata(self, req, ctxt):
         #TODO:  use https://googleapis.dev/python/protobuf/latest/ instead of reading from file 
         with open('service/service_spec/factai_service.proto', 'r') as file:
             proto_str = file.read()
-        service_name=req.service_name
-        
-        respMetadata=service_proto_pb2.respMetadata()
-        
-        proto_defnition=proto_str
-        service_stub="FACTAIStanceClassificationStub"
-        service_input="InputData"
-        function_name="stance_classify"
-        service_input_params='["body","headline","call_id"]'
+        logger.info(req.tracer_info)
+        tracer_info = eval(req.tracer_info)
+        logger.info("after")
+        trace_id = tracer_info['trace_id']
+        span_id = tracer_info['span_id']
 
-        deployment_type=os.environ['deployment_type']       
-        if deployment_type=="prod":    
-            with open('service/service_spec/service_definition_prod.json', 'r') as file:
-                service_definition_str = file.read()
-        else:
-            with open('service/service_spec/service_definition.json', 'r') as file:
-                service_definition_str = file.read()
-        
-        service_definition=json.loads(service_definition_str)
-        service_definition["declarations"]["protobuf_definition"]=proto_defnition
-        service_definition["declarations"]["service_stub"]=service_stub
-        service_definition["declarations"]["function"]=function_name
-        service_definition["declarations"]["input"]=service_input
-        service_definition["declarations"]["service_input_params"]=service_input_params
-        respMetadata.service_definition=json.dumps(service_definition)
-        return respMetadata
+        span_context = SpanContext(
+        trace_id=trace_id,
+        span_id=span_id,
+        is_remote=True,
+        trace_flags=TraceFlags(0x01)
+        )
+        ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
+        with tracer.start_as_current_span("req_metadata", context=ctx) as span:
+            
+            service_name=req.service_name
+            
+            respMetadata=service_proto_pb2.respMetadata()
+            
+            proto_defnition=proto_str
+            service_stub="FACTAIStanceClassificationStub"
+            service_input="InputData"
+            function_name="stance_classify"
+            service_input_params='["body","headline","call_id","tracer_info"]'
+
+            deployment_type=os.environ['deployment_type']       
+            if deployment_type=="prod":    
+                with open('service/service_spec/service_definition_prod.json', 'r') as file:
+                    service_definition_str = file.read()
+            else:
+                with open('service/service_spec/service_definition.json', 'r') as file:
+                    service_definition_str = file.read()
+            
+            service_definition=json.loads(service_definition_str)
+            service_definition["declarations"]["protobuf_definition"]=proto_defnition
+            service_definition["declarations"]["service_stub"]=service_stub
+            service_definition["declarations"]["function"]=function_name
+            service_definition["declarations"]["input"]=service_input
+            service_definition["declarations"]["service_input_params"]=service_input_params
+            respMetadata.service_definition=json.dumps(service_definition)
+            return respMetadata
 
 def run_server(tf_session):
     class HTTPapi(BaseHTTPRequestHandler):

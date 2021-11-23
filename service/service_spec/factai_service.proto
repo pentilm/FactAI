@@ -6,6 +6,7 @@ message InputData {
     string headline = 1;
     string body = 2;
     string call_id = 3;
+    string tracer_info = 4;
 }
 
 message Stance {
