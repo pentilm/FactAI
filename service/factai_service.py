@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# Import relevant packages and modules
 from service.util import *
 import random
 import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.layers import Dense
+from tensorflow.keras import Sequential
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+import numpy as np
 import os
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -88,8 +92,6 @@ except:
 
 logger=Log.logger
 
-# serve_port = os.environ['SERVICE_PORT']
-
 # Set file names
 file_train_instances = "service/train_stances.csv"
 file_train_bodies = "service/train_bodies.csv"
@@ -117,43 +119,53 @@ n_train = len(raw_train.instances)
 
 
 # Process data sets
-train_set, train_stances, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = \
-    pipeline_train(raw_train, raw_test, lim_unigram=lim_unigram)
+train_set, train_stances, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = pipeline_train(raw_train, raw_test, lim_unigram=lim_unigram)
 feature_size = len(train_set[0])
-logger.info("feature_size: "+ str(feature_size))
 test_set = pipeline_test(raw_test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
 
 
-# Define model
 
-# Create placeholders
-features_pl = tf.placeholder(tf.float32, [None, feature_size], 'features')
-stances_pl = tf.placeholder(tf.int64, [None], 'stances')
-keep_prob_pl = tf.placeholder(tf.float32)
+def train_save():
+    X = np.asarray(train_set)[:500]
+    y = np.asarray(train_stances)[:500]
 
-# Infer batch size
-batch_size = tf.shape(features_pl)[0]
 
-# Define multi-layer perceptron
-hidden_layer = tf.nn.dropout(tf.nn.relu(tf.contrib.layers.linear(features_pl, hidden_size)), keep_prob=keep_prob_pl)
-logits_flat = tf.nn.dropout(tf.contrib.layers.linear(hidden_layer, target_size), keep_prob=keep_prob_pl)
-logits = tf.reshape(logits_flat, [batch_size, target_size])
 
-# Define L2 loss
-tf_vars = tf.trainable_variables()
-l2_loss = tf.add_n([tf.nn.l2_loss(v) for v in tf_vars if 'bias' not in v.name]) * l2_alpha
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+    print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)
+    # # determine the number of input features
+    n_features = X_train.shape[1]
 
-# Define overall loss
-loss = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits, stances_pl) + l2_loss)
+    print(n_features)
+    model = Sequential()
+    model.add(Dense(10, activation='relu', kernel_initializer='he_normal', input_shape=(1001,)))
+    model.add(Dense(8, activation='relu', kernel_initializer='he_normal'))
+    model.add(Dense(4, activation='softmax'))
+    # compile the model
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    # fit the model
+    model.fit(X_train, y_train, epochs=150, batch_size=32, verbose=0)
+    # evaluate the model
+    loss, acc = model.evaluate(X_test, y_test, verbose=0)
+    print('Test Accuracy: %.3f' % acc)
 
-# Define prediction
-softmaxed_logits = tf.nn.softmax(logits)
-predict = tf.arg_max(softmaxed_logits, 1)
+    model.save('saved_model/factai_model')
 
+# TRAIN THE MODEL IF YOU WANT TO 
+# train_save()
+
+# HOW TO DO PREDICTION INSIDE THE PIPELINE
+model = tf.keras.models.load_model('saved_model/factai_model')
+
+
+input_data = {'headline' : "headline",'body' : "body"}
+test_set = pipeline_serve(input_data,bow_vectorizer,tfreq_vectorizer,tfidf_vectorizer)
+yhat = model.predict([test_set[0].tolist()])
+print('Predicted: %s (class=%d)' % (yhat, np.argmax(yhat)))
 
 class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
-    def __init__(self, tf_session):
-        self.tf_session = tf_session
+    def __init__(self,model):
+        self.model = model
 
     def stance_classify(self, req, ctxt):
         current_span = trace.get_current_span()
@@ -192,8 +204,19 @@ class GRPCapi(pb2_grpc.FACTAIStanceClassificationServicer):
                                     bow_vectorizer,
                                     tfreq_vectorizer,
                                     tfidf_vectorizer)
-            test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
-            pred = self.tf_session.run(softmaxed_logits, feed_dict=test_feed_dict)[0]
+
+            # test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
+            # pred = self.tf_session.run(softmaxed_logits, feed_dict=test_feed_dict)[0]
+
+
+            yhat = self.model.predict([test_set[0].tolist()])
+            # print('Predicted: %s (class=%d)' % (yhat, argmax(yhat)))
+
+            pred = yhat.tolist()
+            logger.info(pred)
+            pred = pred[0]
+
+
             stance_pred = pb2.Stance()
             resp=pb2.Resp()
             stance_pred.agree = pred[0]
@@ -293,7 +316,7 @@ class GRPCproto(service_proto_pb2_grpc.ProtoDefnitionServicer):
             respMetadata.service_definition=json.dumps(service_definition)
             return respMetadata
 
-def run_server(tf_session):
+def run_server():
     class HTTPapi(BaseHTTPRequestHandler):
         def do_POST(self):
             content_length = int(self.headers['Content-Length'])
@@ -309,10 +332,16 @@ def run_server(tf_session):
                                               bow_vectorizer,
                                               tfreq_vectorizer,
                                               tfidf_vectorizer)
-                    test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
-                    pred = tf_session.run(softmaxed_logits, feed_dict=test_feed_dict)[0]
-                    labeled_pred = zip(["agree", "disagree", "discuss", "unrelated"],
-                                       ['{:.2f}'.format(s_c) for s_c in pred])
+
+
+                    # test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
+                    # pred = tf_session.run(softmaxed_logits, feed_dict=test_feed_dict)[0]
+
+                    yhat = model.predict([test_set[0].tolist()])
+
+                    labeled_pred = ["agree", "disagree", "discuss", "unrelated"][np.argmax(yhat)]
+
+
                     self.send_response(200)
                     self.send_header('Content-Type', 'text/plain')
                     self.end_headers()
@@ -330,10 +359,8 @@ def run_server(tf_session):
     return HTTPapi
 
 
-sess = tf.Session()
-load_model(sess)
 grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=100))
-pb2_grpc.add_FACTAIStanceClassificationServicer_to_server(GRPCapi(sess), grpc_server)
+pb2_grpc.add_FACTAIStanceClassificationServicer_to_server(GRPCapi(model), grpc_server)
 service_proto_pb2_grpc.add_ProtoDefnitionServicer_to_server(GRPCproto(), grpc_server)
 grpc_server.add_insecure_port('[::]:' + str(grpc_port))
 grpc_server.start()

@@ -2,8 +2,10 @@ snet.sdk
 snet-cli
 grpcio>=1.14.2
 grpcio-tools>=1.14.1
-numpy==1.11.3
-scikit-learn==0.18.1
-scipy==0.18.1
-tensorflow==0.12.1
+numpy==1.19.2
+scikit-learn==0.21.3
+scipy==1.1.0
+tensorflow==2.6
 protobuf
+keras==2.6.0
+Keras-Preprocessing==1.1.2
